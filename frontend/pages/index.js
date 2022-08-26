@@ -15,9 +15,7 @@ export default function Home() {
         <h1>Hello world!</h1>
       </main>
 
-      <footer>
-        <p>Made By Hamza</p>
-      </footer>
+     
     </div>
   )
 }

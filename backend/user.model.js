@@ -22,7 +22,7 @@ const UserSchema = new Schema({
         unique:true,
     },
     code:{
-        required: true,
+        required: false,
         type: String,
     }
 });
