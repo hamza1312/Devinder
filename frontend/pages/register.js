@@ -1,21 +1,32 @@
 import React from "react";
 import { useToast } from "@chakra-ui/react";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Select } from "@chakra-ui/react";
 function register() {
   const [phoneNumber, setPhoneNumber] = React.useState(0);
   const [password, setPassword] = React.useState(null);
   const [gender, setGender] = React.useState(null);
   const [name, setName] = React.useState(null);
+  const [visibilityState,setVisibilityState] = React.useState(false)
+  const [visibilityStateTwo,setVisibilityStateTwo] = React.useState(false)
   const toast = useToast();
   const [confirmPassword, setConfirmPassword] = React.useState(null);
-  const verifyPhone = (input)=>{
+  const verifyPhone = (input) => {
     var re = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
     return re.test(input);
-  } 
-  const SubmitForm = async(e) => {
+  };
+  const SubmitForm = async (e) => {
+  
     e.preventDefault();
 
-    if (phoneNumber == 0 || password == null || confirmPassword == null || name == null || gender == null) {
+    if (
+      phoneNumber == 0 ||
+      password == null ||
+      confirmPassword == null ||
+      name == null ||
+      gender == null
+    ) {
       toast({
         title: "Please Fill All the Inputs.",
 
@@ -33,7 +44,7 @@ function register() {
         duration: 9000,
         isClosable: true,
       });
-    } else if (!verifyPhone(phoneNumber)){
+    } else if (!verifyPhone(phoneNumber)) {
       toast({
         title: "Please Enter a Valid Phone Number.",
 
@@ -42,48 +53,52 @@ function register() {
         duration: 9000,
         isClosable: true,
       });
-    } 
-    else {
-
+    } else {
       await fetch("http://localhost:9000/register", {
         method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: name,
           phonenum: phoneNumber,
           password,
           gender: gender,
-        })
-      }).then(res => res.json())
-      .then(data => {
-        if(data.code == "ERROR"){
-          toast({
-            title: data.message,
-            status: "error",
-            variant: "left-accent",
-            duration: 9000,
-            isClosable: true,
-          });
-        }
-        else{
-          toast({
-            title: data.message,
-            status: "success",
-            variant: "left-accent",
-            duration: 9000,
-            isClosable: true,
-          });
-          setTimeout(()=>{
-            window.location.href = '/login'
-          },1000)
-        }
-
-      }
-      )
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.code == "ERROR") {
+            toast({
+              title: data.message,
+              status: "error",
+              variant: "left-accent",
+              duration: 9000,
+              isClosable: true,
+            });
+          } else {
+            toast({
+              title: data.message,
+              status: "success",
+              variant: "left-accent",
+              duration: 9000,
+              isClosable: true,
+            });
+            setTimeout(() => {
+              window.location.href = "/login";
+            }, 1000);
+          }
+        });
     }
   };
+  const updateVisibility= ()=>{
+    setVisibilityState(!visibilityState);
+    console.log(visibilityState);
+  }
+  const updateVisibilityTwo= ()=>{
+    setVisibilityStateTwo(!visibilityStateTwo);
+    console.log(visibilityStateTwo);
+  }
   return (
     <section className="bg-gray-50 dark:bg-gray-900 ">
       <div className="flex flex-col items-center justify-center px-6 py-8 h-fit md:h-screen lg:py-0">
@@ -96,7 +111,7 @@ function register() {
               Create your Account
             </h1>
             <form className="space-y-4 md:space-y-6 " onSubmit={SubmitForm}>
-            <div>
+              <div>
                 <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Your Name
                 </label>
@@ -128,29 +143,43 @@ function register() {
                 <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                   Password
                 </label>
-                <input
-                  type="password"
-                  name="password"
-                  id="password"
-                  placeholder="Your Secure Password"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500"
-                  required
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className=" flex flex-row  text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600  w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500">
+                  <input
+                    type={visibilityState ? "text" : "password"}
+                    name="password"
+                    id="password"
+                    placeholder="Your Secure Password"
+                    className="bg-transparent outline-none"
+                    required
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  { !visibilityState ?
+                  <VisibilityOffIcon className="w-full -ml-5 text-white"  onClick={updateVisibility}/>
+                  : 
+                  <VisibilityIcon className="w-full -ml-5 text-white"  onClick={updateVisibility}/>
+                  }  
+                </div>
               </div>
               <div>
                 <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Confirm password
+                  Confirm Password
                 </label>
-                <input
-                  type="confirm-password"
-                  name="confirm-password"
-                  id="confirm-password"
-                  placeholder="Confirm Your Password"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500"
-                  required
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                <div className=" flex flex-row  text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600  w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500">
+                  <input
+                    type={visibilityStateTwo ? "text" : "password"}
+                    name="password"
+                    id="password"
+                    placeholder="Your Secure Password"
+                    className="bg-transparent outline-none"
+                    required
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  { !visibilityStateTwo ?
+                  <VisibilityOffIcon className="w-full -ml-5 text-white"  onClick={updateVisibilityTwo}/>
+                  : 
+                  <VisibilityIcon className="w-full -ml-5 text-white"  onClick={updateVisibilityTwo}/>
+                  }  
+                </div>
               </div>
               <Select
                 placeholder="Select Your Gender"
