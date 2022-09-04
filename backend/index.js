@@ -4,11 +4,30 @@ const jwt = require("jsonwebtoken");
 const Post = require("./post.model");
 const mongoose = require("mongoose");
 const User = require("./user.model");
+const { Server } = require("socket.io")
+const http = require('http')
 
-const prettier = require("prettier");
+const app = express();
+const cors = require("cors");
+
+app.use(cors());
+app.use(express.json());
+
+
+const server = http.createServer(app)
+
+
+const io = new Server(server, {
+  cors: {
+    origin: "*"
+  },
+});
+
+server.listen(9000, () => console.log("Listening on port 9000..."));
+
 
 const dotenv = require("dotenv");
-const cors = require("cors");
+
 dotenv.config();
 mongoose.connect(process.env.MONGODB, (err) => {
   if (err) {
@@ -18,9 +37,7 @@ mongoose.connect(process.env.MONGODB, (err) => {
   }
 });
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+
 
 app.get("/", (req, res) => {
   res.send("Hello, World!");
@@ -84,28 +101,37 @@ app.post("/login", async (req, res) => {
 
 app.post("/post", async (req, res) => {
   const { title, code } = req.body;
-  const formatted = prettier.format(code, {
-    semi: true,
-    parser: "babel",
-  });
-  formatted.replace('"', '"');
-
-  const post = Post.create({
-    title: title,
-    code: formatted,
-  })
-    .then((post) => {
-      res.status(201).send({
-        code: "SUCCESS",
-        message: "Post created successfully!",
-        data: post,
-      });
-      console.log(formatted);
+  const { token } = req.headers;
+  const encoded = await jwt.verify(token, process.env.JWT_KEY).user;
+  if (encoded) {
+    await Post.create({
+      title: title,
+      code: code,
+      creator: encoded.name
     })
-    .catch((err) => {
-      res.status(400).send({ code: "ERROR", message: "Duplicated Code." });
-      console.log(err);
-    });
+      .then((post) => {
+        res.status(201).send({
+          code: "SUCCESS",
+          message: "Post created successfully!",
+          data: post,
+        });
+
+      })
+      .catch((err) => {
+        res.send({
+          "code": "ERROR",
+          "message": "Duplicated Code!"
+        })
+      })
+
+
+  }
+  else {
+    res.send({
+      code: "ERROR",
+      message: "Invalid Token!"
+    })
+  }
 });
 app.post("/post/like", async (req, res) => {
   const { token } = req.headers;
@@ -159,6 +185,26 @@ app.post("/post/dislike", async (req, res) => {
     res.send({ code: "ERROR", message: "Invalid User / Post." });
   }
 });
+app.get("/user/:name", async (req, res) => {
+  const { name } = req.params;
+  const user = await User.findOne({ name: name });
+  const posts = await Post.find({ name })
+  if (user && posts) {
+    res.send({
+      code: "SUCCESS",
+      user,
+      posts,
+    })
+  }
+  else {
+    res.send({
+      code: "ERROR",
+      message: "User Doesn't Have any posts"
+    })
+  }
+
+
+})
 app.get("/feed", async (req, res) => {
   const posts = await Post.find();
 
@@ -172,4 +218,19 @@ app.get("/feed", async (req, res) => {
     data: posts,
   });
 });
-app.listen(9000, () => console.log("Listening on port 9000..."));
+
+const connection = mongoose.connection;
+
+connection.once("open", () => {
+  const postsChangeStream = connection.collection("post").watch();
+
+  postsChangeStream.on("change", (change) => {
+    switch (change.operationType) {
+      case "insert":
+        io.emit("newPost", change);
+        console.log(change)
+        break;
+    }
+  })
+})
+

@@ -1,10 +1,12 @@
-import React from "react";
+import React from "react"
 import { useToast } from "@chakra-ui/react";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { Select } from "@chakra-ui/react";
 function register() {
   const [phoneNumber, setPhoneNumber] = React.useState(0);
+
+  
   const [password, setPassword] = React.useState(null);
   const [gender, setGender] = React.useState(null);
   const [name, setName] = React.useState(null);
