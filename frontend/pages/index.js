@@ -4,6 +4,9 @@ import AddIcon from '@mui/icons-material/Add';
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import { useToast } from "@chakra-ui/react";
+import Editor from "@monaco-editor/react";
+import SyntaxHighlighter from 'react-syntax-highlighter';
+import { atomOneDark } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
@@ -18,7 +21,7 @@ import {
 } from '@chakra-ui/react'
 import React from "react";
 import io from "socket.io-client"
-import { Textarea } from '@chakra-ui/react'
+
 export default function Home({ data }) {
   const [browsingState, setBrowsingState] = React.useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -35,14 +38,23 @@ export default function Home({ data }) {
       const authenticated = localStorage.getItem("token");
       const socket = io.connect("http://localhost:9000");
       socket.on("newPost", (post) => {
-        data.data.push(post.fullDocument)
+        console.log("HOY")
+        data.data = [...data.data, post.fullDocument]
       })
       if (!authenticated) {
         location.href = "/login"
       }
       const state = localStorage.getItem("state");
       if (state) {
-        setBrowsingState(parseInt(state))
+        const numbered_state = parseInt(state);
+        if(numbered_state >= data.data.length){
+          console.log("mhmmmm")
+          setBrowsingState(data.data.length - 1);
+          localStorage.setItem( "state",data.data.length - 1);
+        }
+        else{
+          setBrowsingState(state);
+        }
       }
     }
 
@@ -106,6 +118,8 @@ export default function Home({ data }) {
 
   }
   const createPost = async () => {
+  
+
 
     await fetch('http://localhost:9000/post', {
       method: "POST",
@@ -133,7 +147,7 @@ export default function Home({ data }) {
 
   }
   const nextPost = () => {
-    if (data.data.length > browsingState + 1) {
+    if (data.data.length - 1 > browsingState || data.data.length  == browsingState) {
       setBrowsingState(browsingState + 1);
       localStorage.setItem("state", browsingState + 1)
     } else {
@@ -176,11 +190,9 @@ export default function Home({ data }) {
           </h1>
           <p className="mb-2 font-mono font-bold">By: <span className="p-2 rounded-lg bg-blue-600 bg-gradient-to-r from-blue-700 via-blue-600 text-gray-200 cursor-pointer ">{currentData.creator}</span></p>
 
-          <iframe
-            src={`https://carbon.now.sh/embed?bg=rgba%28171%2C+184%2C+195%2C+1%29&t=seti&wt=sharp&l=coffeescript&width=680&ds=false&dsyoff=20px&dsblur=68px&wc=false&wa=true&pv=0px&ph=0px&ln=false&fl=1&fm=JetBrains+Mono&fs=15.5px&lh=163%25&si=false&es=2x&wm=false&code=${currentData.code}`}
-            sandbox="allow-scripts allow-same-origin"
-            className="w-full h-fit outline-none"
-          ></iframe>
+          <SyntaxHighlighter language="javascript" style={atomOneDark}>
+            {currentData.code}
+          </SyntaxHighlighter>
           <div className="w-full flex flex-row justify-evenly mt-6">
             <button
               onClick={() => likePost(currentData._id)}
@@ -229,29 +241,32 @@ export default function Home({ data }) {
         <div onClick={onOpen} className="absolute bottom-0 cursor-pointer right-0 border-b-4  bg-blue-700 bg-gradient-to-r from-blue-500 hover:p-8  transition-all   via-blue-600  m-6 border-l-4 border-blue-800 p-6 rounded-lg text-white"><AddIcon /></div>
         <Modal isOpen={isOpen} onClose={onClose}>
           <ModalOverlay />
-          <ModalContent className="font-mono dark:bg-blue-900 dark:text-white">
+          <ModalContent className="font-mono bg-blue-900 text-white">
             <ModalHeader>Create Post</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
               <input
                 type="text"
-                name="name"
-                id="name"
+
+
                 placeholder="Title"
-                className="bg-gray-50 mb-2 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500"
+                className=" mb-2 border  sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-green-500 focus:border-green-500"
                 required
                 onChange={(e) => setPostTitle(e.target.value)}
 
               />
-              <Textarea
+              <Editor
                 type="text"
-                name="name"
-                id="name"
-                minLength={50}
-                placeholder="Code"
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500"
+
+                defaultLanguage="javascript"
+                defaultValue="// Your Code!"
+                height="65vh"
+                theme="vs-dark"
+
+
+                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm mt-2 focus:ring-primary-600 focus:border-primary-600 block w-full border-none outline-none  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500"
                 required
-                onChange={(e) => setPostCode(e.target.value)}
+                onChange={setPostCode}
 
               />
             </ModalBody>
