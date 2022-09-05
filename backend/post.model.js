@@ -7,15 +7,15 @@ const Post = new Schema({
     required: true,
     unique: true,
   },
-  title :{
+  title: {
     type: String,
     required: true,
   },
-  creator:{
-    type:String,
-    required:true,
+  creator: {
+    type: String,
+    required: true,
   },
-  // Likes
+
   likes: [
     {
       type: Schema.Types.ObjectId,
@@ -26,7 +26,7 @@ const Post = new Schema({
   dislikes: [
     {
       type: Schema.Types.ObjectId,
-      
+
       ref: "User",
     },
   ],

@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Image from "next/image";
+import { useRouter } from "next/router"
 import AddIcon from '@mui/icons-material/Add';
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
@@ -8,7 +8,6 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   Modal,
-
   ModalOverlay,
   ModalContent,
   ModalHeader,
@@ -23,6 +22,7 @@ import { Textarea } from '@chakra-ui/react'
 export default function Home({ data }) {
   const [browsingState, setBrowsingState] = React.useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const router = useRouter();
   const [postTitle, setPostTitle] = React.useState(null);
   const [postCode, setPostCode] = React.useState(null);
   const toast = useToast();
@@ -61,9 +61,50 @@ export default function Home({ data }) {
     })
       .then((res) => res.json())
       .then((data) => {
-        location.reload();
+        if (data.code == "ERROR") {
+          toast({
+            title: data.message,
+            status: "error",
+            varient: "left-accent",
+            duration: 9000,
+            isClosable: true,
+          })
+        }
+        else {
+          router.replace(router.asPath);
+        }
       });
   };
+  const dislikePost = async (postId) => {
+    await fetch("http://localhost:9000/post/dislike", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        token: localStorage.getItem("token"),
+      },
+      body: JSON.stringify({
+        postId,
+      })
+    }).then((res) => res.json())
+      .then((data) => {
+        if (data.code == "ERROR") {
+          toast({
+            title: data.message,
+            status: "error",
+            varient: "left-accent",
+            duration: 9000,
+            isClosable: true,
+          })
+        }
+        else {
+          router.replace(router.asPath);
+        }
+
+
+
+      })
+
+  }
   const createPost = async () => {
 
     await fetch('http://localhost:9000/post', {
@@ -94,7 +135,7 @@ export default function Home({ data }) {
   const nextPost = () => {
     if (data.data.length > browsingState + 1) {
       setBrowsingState(browsingState + 1);
-      localStorage.setItem("state", browsingState - 1)
+      localStorage.setItem("state", browsingState + 1)
     } else {
       toast({
         title: "There is no more posts!",
@@ -150,7 +191,7 @@ export default function Home({ data }) {
                 {currentData.likes.length}
               </p>
             </button>
-            <button className="bg-gray-600 w-fit p-8 flex flex-row items-center justify-center  cursor-pointer  text-white bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-800 shadow-lg shadow-gray-500/50 dark:shadow-lg dark:shadow-gray-800/80 font-medium rounded-lg text-sm px-5 py-4 text-center mr-2 mb-2">
+            <button onClick={() => dislikePost(currentData._id)} className="bg-gray-600 w-fit p-8 flex flex-row items-center justify-center  cursor-pointer  text-white bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-800 shadow-lg shadow-gray-500/50 dark:shadow-lg dark:shadow-gray-800/80 font-medium rounded-lg text-sm px-5 py-4 text-center mr-2 mb-2">
               <ThumbDownIcon />
               <p className="ml-3 font-mono font-bold">
                 {currentData.dislikes.length}

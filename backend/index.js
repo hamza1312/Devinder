@@ -123,8 +123,6 @@ app.post("/post", async (req, res) => {
           "message": "Duplicated Code!"
         })
       })
-
-
   }
   else {
     res.send({
@@ -141,14 +139,33 @@ app.post("/post/like", async (req, res) => {
   const post = await Post.findOne({ _id: postId });
   if (user && post) {
     const likesIndex = post.likes.indexOf(user._id);
+    const dislikeIndex = post.dislikes.indexOf(user._id);
     if (post.likes[likesIndex]) {
-      res.status(400).send({
-        code: "ERROR",
-        message: "Post Already Liked!",
-      });
-    } else {
+      const likes = post.likes.filter((_, index) => {
+        return index != likesIndex;
+      })
+      post.likes = likes;
+      await post.save();
+
+      res.send({
+        message: "Removing Like..."
+      })
+    } else if (post.dislikes[dislikeIndex]) {
+      const dislikes = post.dislikes.filter((val, index) => {
+        return index != dislikeIndex;
+      })
+      post.dislikes = dislikes;
       post.likes.push(user._id);
-      post.save();
+      await post.save();
+      res.status(201).send({
+        code: "SUCCESS",
+        message: "Removed Dislike, And added Like"
+      })
+    }
+
+    else {
+      post.likes.push(user._id);
+      await post.save();
       res.status(201).send({
         code: "SUCCESS",
         message: "Post Liked Successfuly",
@@ -167,12 +184,33 @@ app.post("/post/dislike", async (req, res) => {
   const post = await Post.findOne({ _id: postId });
   if (user && post) {
     const dislikeIndex = post.dislikes.indexOf(user._id);
+    const likesIndex = post.likes.indexOf(user._id);
     if (post.dislikes[dislikeIndex]) {
-      res.status(400).send({
-        code: "ERROR",
-        message: "Post Already Disliked!",
-      });
-    } else {
+      const dislikes = post.dislikes.filter((val, index) => {
+        return index != dislikeIndex;
+      })
+      post.dislikes = dislikes;
+      await post.save();
+      res.status(201).send({
+        code: "SUCCESS",
+        message: "Removed Dislike Successfully"
+      })
+
+    } else if(post.likes[likesIndex]){
+      const likes = post.likes.filter((_, index) => {
+        return index != likesIndex;
+      })
+      post.likes = likes;
+      
+      post.dislikes.push(user._id);
+      await post.save();
+      
+      res.status(201).send({
+        code: "SUCCESS",
+        message: "Removed Like , And Added Dislike"
+      })
+    } 
+    else {
       post.dislikes.push(user._id);
       post.save();
       res.status(201).send({
@@ -228,7 +266,7 @@ connection.once("open", () => {
     switch (change.operationType) {
       case "insert":
         io.emit("newPost", change);
-        console.log(change)
+        console.log("new post!")
         break;
     }
   })
