@@ -6,7 +6,7 @@ import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import { useToast } from "@chakra-ui/react";
 import Editor from "@monaco-editor/react";
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { atomOneDark } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
+import { pojoaque } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
@@ -38,7 +38,7 @@ export default function Home({ data }) {
       const authenticated = localStorage.getItem("token");
       const socket = io.connect("http://localhost:9000");
       socket.on("newPost", (post) => {
-        console.log("HOY")
+       
         data.data = [...data.data, post.fullDocument]
       })
       if (!authenticated) {
@@ -48,7 +48,7 @@ export default function Home({ data }) {
       if (state) {
         const numbered_state = parseInt(state);
         if(numbered_state >= data.data.length){
-          console.log("mhmmmm")
+         
           setBrowsingState(data.data.length - 1);
           localStorage.setItem( "state",data.data.length - 1);
         }
@@ -190,7 +190,7 @@ export default function Home({ data }) {
           </h1>
           <p className="mb-2 font-mono font-bold">By: <span className="p-2 rounded-lg bg-blue-600 bg-gradient-to-r from-blue-700 via-blue-600 text-gray-200 cursor-pointer ">{currentData.creator}</span></p>
 
-          <SyntaxHighlighter language="javascript" style={atomOneDark}>
+          <SyntaxHighlighter wrapLines showLineNumbers className="font-mono  rounded-lg mt-6 "language="javascript" style={pojoaque}>
             {currentData.code}
           </SyntaxHighlighter>
           <div className="w-full flex flex-row justify-evenly mt-6">
