@@ -265,7 +265,7 @@ connection.once("open", () => {
   postsChangeStream.on("change", (change) => {
     switch (change.operationType) {
       case "insert":
-        io.emit("newPost", change);
+        io.emit("newPost", change.fullDocument);
         console.log("new post!")
         break;
     }
