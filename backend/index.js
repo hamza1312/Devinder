@@ -45,6 +45,7 @@ app.post("/register", async (req, res) => {
 		phonenum = phonenum.replace("-", "");
 		phonenum = phonenum.replace("(", "");
 		phonenum = phonenum.replace(")", "");
+		phonenum = phonenum.replace("-", "");
 		const user = new User({
 			name,
 			phonenum,
