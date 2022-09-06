@@ -4,6 +4,7 @@ import AddIcon from '@mui/icons-material/Add';
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import { useToast } from "@chakra-ui/react";
+
 import Editor from "@monaco-editor/react";
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { pojoaque } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
@@ -36,10 +37,11 @@ export default function Home({ data }) {
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       const authenticated = localStorage.getItem("token");
-      const socket = io.connect("http://localhost:9000");
+      const socket = io.connect(process.env.backendUrl);
       socket.on("newPost", (post) => {
-       
-        data.data = [...data.data, post.fullDocument]
+        console.log(post)
+        data.data.push(post)
+        console.log(data.data)
       })
       if (!authenticated) {
         location.href = "/login"
@@ -53,7 +55,7 @@ export default function Home({ data }) {
           localStorage.setItem( "state",data.data.length - 1);
         }
         else{
-          setBrowsingState(state);
+          setBrowsingState(parseInt(state));
         }
       }
     }
@@ -61,7 +63,7 @@ export default function Home({ data }) {
 
   }, []);
   const likePost = async (postId) => {
-    await fetch("http://localhost:9000/post/like", {
+    await fetch(`${process.env.backendUrl}/post/like`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -88,7 +90,7 @@ export default function Home({ data }) {
       });
   };
   const dislikePost = async (postId) => {
-    await fetch("http://localhost:9000/post/dislike", {
+    await fetch(`${process.env.backendUrl}/post/dislike`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -121,7 +123,7 @@ export default function Home({ data }) {
   
 
 
-    await fetch('http://localhost:9000/post', {
+    await fetch(`${process.env.backendUrl}/post`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -149,7 +151,7 @@ export default function Home({ data }) {
   const nextPost = () => {
     if (data.data.length - 1 > browsingState || data.data.length  == browsingState) {
       setBrowsingState(browsingState + 1);
-      localStorage.setItem("state", browsingState + 1)
+      localStorage.setItem("state", parseInt(browsingState + 1))
     } else {
       toast({
         title: "There is no more posts!",
@@ -281,7 +283,7 @@ export default function Home({ data }) {
   );
 }
 export async function getServerSideProps(context) {
-  const res = await fetch("http://localhost:9000/feed");
+  const res = await fetch(`${process.env.backendUrl}/feed`);
 
   const data = await res.json();
   return { props: { data } };
