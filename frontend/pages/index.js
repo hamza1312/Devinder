@@ -4,12 +4,13 @@ import AddIcon from '@mui/icons-material/Add';
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ThumbDownIcon from "@mui/icons-material/ThumbDown";
 import { useToast } from "@chakra-ui/react";
-
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import RocketIcon from '@mui/icons-material/Rocket';
+import NewReleasesIcon from '@mui/icons-material/NewReleases';
+import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import Editor from "@monaco-editor/react";
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { pojoaque } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+
 import {
   Modal,
   ModalOverlay,
@@ -38,26 +39,12 @@ export default function Home({ data }) {
     if (typeof window !== "undefined") {
       const authenticated = localStorage.getItem("token");
       const socket = io.connect(process.env.backendUrl);
-      socket.on("newPost", (post) => {
-        console.log(post)
-        data.data.push(post)
-        console.log(data.data)
-      })
+
+
       if (!authenticated) {
         location.href = "/login"
       }
-      const state = localStorage.getItem("state");
-      if (state) {
-        const numbered_state = parseInt(state);
-        if(numbered_state >= data.data.length){
-         
-          setBrowsingState(data.data.length - 1);
-          localStorage.setItem( "state",data.data.length - 1);
-        }
-        else{
-          setBrowsingState(parseInt(state));
-        }
-      }
+
     }
 
 
@@ -120,7 +107,7 @@ export default function Home({ data }) {
 
   }
   const createPost = async () => {
-  
+
 
 
     await fetch(`${process.env.backendUrl}/post`, {
@@ -148,34 +135,7 @@ export default function Home({ data }) {
     })
 
   }
-  const nextPost = () => {
-    if (data.data.length - 1 > browsingState || data.data.length  == browsingState) {
-      setBrowsingState(browsingState + 1);
-      localStorage.setItem("state", parseInt(browsingState + 1))
-    } else {
-      toast({
-        title: "There is no more posts!",
-        status: "error",
-        variant: "left-accent",
-        duration: 9000,
-        isClosable: true,
-      });
-    }
-  };
-  const previousPost = () => {
-    if (browsingState != 0) {
-      setBrowsingState(browsingState - 1);
-      localStorage.setItem("state", browsingState - 1)
-    } else {
-      toast({
-        title: "There is no more posts!",
-        status: "error",
-        variant: "left-accent",
-        duration: 9000,
-        isClosable: true,
-      });
-    }
-  };
+
 
   return (
     <div>
@@ -184,100 +144,63 @@ export default function Home({ data }) {
         <meta name="description" content="Devinder a dating app for Devs." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
-      <main className="w-screen bg-gray-700 h-screen lg:px-36 px-8 py-8 flex flex-col items-center justify-center">
-        <div className="rounded-lg   bg-gray-900  text-white p-8 py-6 lg:w-3/6 t w-full  ">
-          <h1 className="text-3xl font-bold text-blue-500 font-mono mb-6 ">
-            {currentData.title}
-          </h1>
-          <p className="mb-2 font-mono font-bold">By: <span className="p-2 rounded-lg bg-blue-600 bg-gradient-to-r from-blue-700 via-blue-600 text-gray-200 cursor-pointer ">{currentData.creator}</span></p>
-
-          <SyntaxHighlighter wrapLines showLineNumbers className="font-mono  rounded-lg mt-6 "language="javascript" style={pojoaque}>
-            {currentData.code}
-          </SyntaxHighlighter>
-          <div className="w-full flex flex-row justify-evenly mt-6">
-            <button
-              onClick={() => likePost(currentData._id)}
-              className="bg-blue-600 w-fit p-8 flex flex-row items-center justify-center  cursor-pointer text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 "
-            >
-              <ThumbUpIcon />
-              <p className="ml-3 font-mono font-bold">
-                {currentData.likes.length}
-              </p>
-            </button>
-            <button onClick={() => dislikePost(currentData._id)} className="bg-gray-600 w-fit p-8 flex flex-row items-center justify-center  cursor-pointer  text-white bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-800 shadow-lg shadow-gray-500/50 dark:shadow-lg dark:shadow-gray-800/80 font-medium rounded-lg text-sm px-5 py-4 text-center mr-2 mb-2">
-              <ThumbDownIcon />
-              <p className="ml-3 font-mono font-bold">
-                {currentData.dislikes.length}
-              </p>
-            </button>
+      <main className="w-screen flex flex-col bg-gray-200 overflow-x-hidden">
+        <div className="flex flex-col w-screen pt-28 p-2  h-screen bg-gray-200 items-center">
+          <div className="rounded-lg w-full lg:w-2/4 bg-white p-6 mb-6 flex flex-row">
+            <AccountCircleIcon className="text-5xl text-gray-600" />
+            <input onClick={onOpen} placeholder="What's Your best code?" className="cursor-pointer w-full bg-gray-100  rounded-md outline-none ml-6 p-3"></input>
           </div>
-          <div className="w-full mt-8 bg-gray-200 rounded-full h-2.5 dark:bg-gray-600">
-            <div
-              className="bg-blue-600 h-2.5 rounded-full bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 shadow-lg shadow-blue-500/50 dark:shadow-lg dark:shadow-blue-800/80"
-              style={{
-                width: `${(currentData.likes.length / currentData.dislikes.length) * 100
-                  }%`,
-                maxWidth: "100%",
-              }}
-            ></div>
-          </div>
-          <div className="w-full flex flex-row items-center justify-between font-mono mt-6">
-            <button
-              onClick={previousPost}
-              className="bg-gray-600 w-fit  flex flex-row items-center justify-center  cursor-pointer  text-white bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-800 shadow-lg shadow-gray-500/50 dark:shadow-lg dark:shadow-gray-800/80 font-medium rounded-lg text-sm px-5 py-3 text-center "
-            >
-              <ArrowBackIcon className="text-lg mr-1" />
-              Previous
-            </button>
+          <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalOverlay />
+            <ModalContent className="font-mono">
+              <ModalHeader>Create Post</ModalHeader>
+              <ModalCloseButton />
+              <ModalBody>
+                <input onChange={(e) => setPostTitle(e.target.value)} className="w-full p-4 outline-none bg-gray-100 rounded-md placeholder:font-gray-400" placeholder="Your amazing code title!" ></input>
+                <Editor options={{
+                  padding: {
+                    top: 25,
+                  }
+                  
+                }} onChange={setPostCode} height={"30vh"} className={"mt-6 "} defaultValue={"// My code!"} defaultLanguage="javascript"></Editor>
+              </ModalBody>
+              <ModalFooter>
+                <button onClick={createPost} className="p-4 bg-blue-600 text-white rounded-lg">Submit</button>
+              </ModalFooter>
+            </ModalContent>
+          </Modal>
+          {/* <div className="w-full lg:w-2/4 bg-white p-3  rounded-lg h-fit flex flex-row items-center ">
+            <div className="p-3 cursor-pointer mx-2 font-extrabold rounded-full bg-blue-100 flex flex-row justify-between text-blue-700">
+              <RocketIcon className="mr-2" />
+              <p className="mr-2">Best</p>
+            </div>
+            <div className="p-3 mx-2 cursor-pointer  font-extrabold rounded-full bg-gray-100 flex flex-row justify-between text-gray-700">
+              <LocalFireDepartmentIcon className="mr-2" />
+              <p className="mr-2">Hot</p>
+            </div>
+            <div className="p-3 mx-2 cursor-pointer font-extrabold rounded-full bg-gray-100 flex flex-row justify-between text-gray-700">
+              <NewReleasesIcon className="mr-2" />
+              <p className="mr-2" >New</p>
+            </div>
+          </div> */}
+          <div className="w-full lg:w-2/4 p-1 lg:p-0">
+            {data.data.map((val) =>
+              <div className="rounded-lg  bg-white w-full p-6 mt-6" key={val._id}>
+                <p className="italic font-light text-gray-400 text-xs mb-2">Posted by {val.creator}</p>
+                <h1 className="text-xl font-sans mb-4 font-extrabold">{val.title}!</h1>
+                <SyntaxHighlighter language="javascript" showLineNumbers className="rounded-lg" >
+                  {val.code}
+                </SyntaxHighlighter>
+                <div className=" flex flex-row w-full  mt-2">
+                  <button onClick={() => likePost(val._id)} className="bg-gray-100  rounded-lg w-fit p-2"><ThumbUpIcon className="mr-2" />{val.likes.length}</button>
+                  <button onClick={() => dislikePost(val._id)} className="bg-gray-100 ml-2 rounded-lg w-fit p-2"><ThumbDownIcon className="mr-2" />{val.dislikes.length}</button>
+                </div>
+              </div>
+            )}
 
-            <button
-              onClick={nextPost}
-              className="bg-gray-600 w-fit  flex flex-row items-center justify-center  cursor-pointer  text-white bg-gradient-to-r from-gray-500 via-gray-600 to-gray-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-gray-300 dark:focus:ring-gray-800 shadow-lg shadow-gray-500/50 dark:shadow-lg dark:shadow-gray-800/80 font-medium rounded-lg text-sm px-5 py-3 text-center "
-            >
-              <ArrowForwardIcon className="text-lg mr-1" />
-              Next
-            </button>
+
           </div>
         </div>
-        <div onClick={onOpen} className="absolute bottom-0 cursor-pointer right-0 border-b-4  bg-blue-700 bg-gradient-to-r from-blue-500 hover:p-8  transition-all   via-blue-600  m-6 border-l-4 border-blue-800 p-6 rounded-lg text-white"><AddIcon /></div>
-        <Modal isOpen={isOpen} onClose={onClose}>
-          <ModalOverlay />
-          <ModalContent className="font-mono bg-blue-900 text-white">
-            <ModalHeader>Create Post</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <input
-                type="text"
-
-
-                placeholder="Title"
-                className=" mb-2 border  sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 bg-gray-700 border-gray-600 placeholder-gray-400 text-white focus:ring-green-500 focus:border-green-500"
-                required
-                onChange={(e) => setPostTitle(e.target.value)}
-
-              />
-              <Editor
-                type="text"
-
-                defaultLanguage="javascript"
-                defaultValue="// Your Code!"
-                height="65vh"
-                theme="vs-dark"
-
-
-                className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm mt-2 focus:ring-primary-600 focus:border-primary-600 block w-full border-none outline-none  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500"
-                required
-                onChange={setPostCode}
-
-              />
-            </ModalBody>
-            <ModalFooter className="flex w-full justify-between">
-              <button onClick={onClose} className="font-mono p-4 bg-gray-600 text-white rounded-lg">Close</button>
-              <button onClick={createPost} className="font-mono p-4 bg-blue-600 text-white rounded-lg">Create</button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
       </main>
     </div>
   );

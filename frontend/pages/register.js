@@ -13,10 +13,7 @@ function Register() {
 	const [visibilityStateTwo, setVisibilityStateTwo] = useState(false);
 	const toast = useToast();
 	const [confirmPassword, setConfirmPassword] = useState(null);
-	const verifyPhone = (input) => {
-		var re = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/;
-		return re.test(input);
-	};
+
 	const SubmitForm = async (e) => {
 		e.preventDefault();
 
@@ -44,15 +41,7 @@ function Register() {
 				duration: 9000,
 				isClosable: true,
 			});
-		} else if (!verifyPhone(phoneNumber)) {
-			toast({
-				title: "Please Enter a Valid Phone Number.",
 
-				status: "error",
-				variant: "left-accent",
-				duration: 9000,
-				isClosable: true,
-			});
 		} else {
 			await fetch(`${process.env.backendurl}/register`, {
 				method: "POST",

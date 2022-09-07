@@ -237,12 +237,13 @@ app.get("/user/:name", async (req, res) => {
 	}
 });
 app.get("/feed", async (req, res) => {
-	const posts = await Post.find();
-
-	posts.sort((a, b) => {
+	let posts = await Post.find();
+	const {arrange} = req.query;
+	
+	posts = posts.sort((a, b) => {
 		return (
-			b.likes.length / b.dislikes.length -
-			a.likes.length / a.dislikes.length
+			b.likes.length / b.dislikes.length  -
+			a.likes.length  / a.dislikes.length
 		);
 	});
 	res.status(200).send({
