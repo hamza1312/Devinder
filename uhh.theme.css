@@ -1,0 +1,28 @@
+/**
+ * @name uhh
+ * @author Tropical#8908, Hammock#3110
+ * @version 3.0.0
+ * @description A cold, dark & frosty theme.
+ * @source https://github.com/DiscordStyles/DarkMatter/
+ * @BDEditor Dark Matter
+*/
+
+@import url('https://DiscordStyles.github.io/DarkMatter/src/base.css');
+@import url('https://nyri4.github.io/Discolored/main.css');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Quicksand:wght@700&display=swap');
+* {
+  font-family: 'Outfit', sans-serif;
+}
+:root {
+  --background-image: url('https://i.imgur.com/7SbtKvw.png');
+  --home-image: url('https://i.imgur.com/233d55Y.gif');
+  --accent: 37, 172, 232;
+  --accent-alt: 29, 101, 134;
+  --background-solid: #161921;
+  --background-solid-dark: #101218;
+  --background-solid-darker: #0c0e12;
+}
+
+/* Any custom CSS below here */
+
+
